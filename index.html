@@ -1,221 +1,617 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Face Recognition ID</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
-<style>
-    body {
-        margin: 0;
-        font-family: 'Inter', sans-serif;
-        background: linear-gradient(135deg, #c3ecff, #ffffff);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Face ID — Add / Know</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Firebase (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <!-- face-api.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+  <style>
+    :root{
+      --glass-bg: rgba(255,255,255,0.18);
+      --glass-border: rgba(255,255,255,0.35);
+      --accent: linear-gradient(90deg,#2f80ed,#7b61ff);
+      --radius: 20px;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     }
-    .container {
-        text-align: center;
+    html,body{height:100%;margin:0;background:#eef3f6;}
+    body{
+      display:flex;align-items:center;justify-content:center;
+      background-image: url('https://images.unsplash.com/photo-1508739773434-c26b3d09e071?q=80&w=1920&auto=format&fit=crop&ixlib=rb-4.0.3&s=589b8a0b89a6f4b1a0a9d06ad905ad1f');
+      background-size:cover;background-position:center;
     }
-    h1 {
-        font-weight: 600;
-        margin-bottom: 30px;
+
+    /* main card */
+    .card{
+      width: min(720px, 94%);
+      height: 86vh;
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.10));
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+      backdrop-filter: blur(14px) saturate(140%);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 10px 40px rgba(8,10,20,0.35);
+      display:flex;flex-direction:column;overflow:hidden;
     }
-    .btn {
-        background: rgba(255,255,255,0.3);
-        border: none;
-        padding: 15px 30px;
-        font-size: 18px;
-        border-radius: 15px;
-        backdrop-filter: blur(10px);
-        cursor: pointer;
-        margin: 10px;
-        box-shadow: 0 4px 30px rgba(0,0,0,0.1);
-        transition: all 0.2s ease;
+    header.header{
+      padding:18px 22px;
+      display:flex;align-items:center;justify-content:center;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.06);
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
     }
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 35px rgba(0,0,0,0.15);
+    header h1{margin:0;font-size:20px;color:#fff;font-weight:600;letter-spacing:0.2px;text-shadow: 0 2px 12px rgba(0,0,0,0.25);}
+
+    .body{
+      padding:26px;
+      display:flex;flex-direction:column;align-items:center;gap:18px;
+      overflow:auto;
+      flex:1;
     }
-    .modal {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        visibility: hidden;
-        opacity: 0;
-        transition: all 0.3s ease;
+
+    .actions{
+      display:flex;gap:18px;flex-wrap:wrap;justify-content:center;width:100%;
+      margin-top:18vh;
     }
-    .modal.active {
-        visibility: visible;
-        opacity: 1;
+    .btn{
+      min-width:200px;
+      background: rgba(255,255,255,0.12);
+      color:#fff;
+      border:1px solid rgba(255,255,255,0.18);
+      padding:14px 20px;border-radius:14px;font-weight:600;
+      box-shadow: 0 6px 24px rgba(10,10,20,0.25);
+      cursor:pointer;backdrop-filter: blur(6px);
+      transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
     }
-    .modal-content {
-        background: rgba(255,255,255,0.9);
-        backdrop-filter: blur(15px);
-        padding: 20px;
-        border-radius: 20px;
-        width: 90%;
-        max-width: 400px;
-        text-align: center;
-        box-shadow: 0 8px 40px rgba(0,0,0,0.2);
-        animation: slideUp 0.4s ease;
+    .btn:hover{ transform:translateY(-4px); box-shadow:0 10px 40px rgba(10,10,20,0.35); }
+    .btn.primary{
+      background: var(--accent); border: none;
     }
-    @keyframes slideUp {
-        from { transform: translateY(30px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
+
+    /* bottom area / camera modal */
+    .overlay{
+      position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+      background: rgba(6,8,12,0.46);
+      visibility:hidden;opacity:0;transition:opacity .18s ease, visibility .18s ease;
+      z-index:60;
     }
-    video {
-        width: 100%;
-        border-radius: 15px;
-        margin-bottom: 15px;
+    .overlay.open{ visibility:visible; opacity:1; }
+
+    .panel{
+      width: min(680px,94%);
+      max-width:900px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.04));
+      border-radius:18px;padding:14px;border:1px solid rgba(255,255,255,0.08);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 30px 80px rgba(4,6,12,0.6);
+      display:grid;grid-template-columns: 1fr 340px;gap:12px;
     }
-    input, textarea {
-        width: 100%;
-        padding: 10px;
-        margin: 5px 0;
-        border-radius: 10px;
-        border: 1px solid #ccc;
+
+    @media (max-width:840px){
+      .panel{ grid-template-columns: 1fr; }
     }
-    .details {
-        text-align: left;
-        margin-top: 10px;
-        background: rgba(255,255,255,0.6);
-        padding: 10px;
-        border-radius: 10px;
+
+    video#video{
+      width:100%;height:100%;border-radius:12px;background:#000;object-fit:cover;
     }
-</style>
+    .left{
+      padding:10px; display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;
+    }
+    .right{
+      padding:12px; display:flex;flex-direction:column;gap:12px;border-left:1px solid rgba(255,255,255,0.03);
+    }
+    .hint{ color:#e5e7eb;font-size:13px;opacity:.95; }
+    .preview{
+      width:100%;height:220px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    .preview img{ width:100%;height:100%;object-fit:cover; }
+
+    .field{ display:flex;flex-direction:column;gap:8px; }
+    input[type="text"], textarea{
+      padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background: rgba(255,255,255,0.03);
+      color:#fff;font-size:14px;outline:none;
+    }
+    textarea{ min-height:80px; resize:vertical; }
+
+    .small-row{ display:flex;gap:8px;flex-wrap:wrap; }
+    .secondary{ background: rgba(255,255,255,0.06); color:#fff; border:none;padding:10px 12px;border-radius:10px; cursor:pointer; }
+
+    .status{
+      position: absolute;left:18px;top:18px;background: rgba(0,0,0,0.45);color:#fff;padding:8px 12px;border-radius:999px;font-weight:600;backdrop-filter: blur(6px);
+    }
+
+    /* message box */
+    .message{
+      margin-top:8px;padding:10px;border-radius:10px;background: linear-gradient(180deg, rgba(0,0,0,0.26), rgba(0,0,0,0.14));
+      color:#fff;font-size:13px;border:1px solid rgba(255,255,255,0.03);
+    }
+
+    /* tiny footer */
+    footer{ padding:10px;text-align:center;font-size:13px;color:rgba(255,255,255,0.85); }
+  </style>
 </head>
 <body>
-<div class="container">
-    <h1>Face Recognition ID</h1>
-    <button class="btn" onclick="startProcess('add')">Add Your Face</button>
-    <button class="btn" onclick="startProcess('know')">Know About Your Face</button>
-</div>
+  <div class="card" role="main" aria-labelledby="title">
+    <header class="header">
+      <h1 id="title">Face ID — Add your face or know about you</h1>
+    </header>
 
-<div class="modal" id="cameraModal">
-    <div class="modal-content">
-        <video id="video" autoplay muted></video>
-        <div id="formArea" style="display:none;">
-            <input type="text" id="name" placeholder="Enter your name">
-            <textarea id="bio" placeholder="Enter your bio"></textarea>
-            <button class="btn" onclick="saveFace()">Save Face Details</button>
+    <div class="body">
+      <div style="width:100%;max-width:720px;margin:auto;">
+        <p style="color:#fff;opacity:0.9;text-align:center;margin:10px 0 26px;">
+          Tap <strong>Add Your Face</strong> to register (camera will open, take your face descriptor, then save name & bio).
+          Tap <strong>Know About Your Face</strong> to let the app scan and show saved info if it matches a stored face.
+        </p>
+
+        <div class="actions">
+          <button class="btn primary" id="btnAdd">Add Your Face</button>
+          <button class="btn" id="btnKnow">Know About Your Face</button>
         </div>
-        <div id="detailsArea" class="details" style="display:none;"></div>
-        <button class="btn" onclick="closeModal()">Close</button>
+
+        <div style="margin-top:28px;text-align:center;">
+          <div id="modelsMessage" class="message">Loading AI models — please wait...</div>
+        </div>
+      </div>
     </div>
-</div>
 
-<script>
-    // Firebase Config
-    const firebaseConfig = {
-        apiKey: "AIzaSyCgqUo8nanOWML5QhZlg6Ttd4q_GktI9-Q",
-        authDomain: "feceid-245b7.firebaseapp.com",
-        projectId: "feceid-245b7",
-        storageBucket: "feceid-245b7.firebasestorage.app",
-        messagingSenderId: "730720795658",
-        appId: "1:730720795658:web:0176127b4f0f5987b0f3f3"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    <footer>Tip: Allow camera access when prompted. This demo stores face descriptors in Firestore (for testing).</footer>
+  </div>
 
-    let currentAction = '';
-    let labeledFaceDescriptors = [];
-    let modelsLoaded = false;
+  <!-- Overlay panel (camera + controls) -->
+  <div id="overlay" class="overlay" aria-hidden="true">
+    <div class="panel" role="dialog" aria-modal="true" aria-label="Camera panel">
+      <div class="left">
+        <div style="width:100%;position:relative;">
+          <div class="status" id="statusTag">Idle</div>
+          <video id="video" autoplay muted playsinline></video>
+        </div>
 
-    async function loadModels() {
-        await faceapi.nets.ssdMobilenetv1.loadFromUri('/models');
-        await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
-        await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
+        <div class="small-row" style="margin-top:8px;">
+          <button id="btnCapture" class="secondary">Capture Snapshot</button>
+          <button id="btnStop" class="secondary">Stop</button>
+        </div>
+      </div>
+
+      <div class="right">
+        <div class="hint" id="rightTitle">Details</div>
+
+        <div class="preview" id="previewArea">
+          <div style="color:#fff;opacity:.8">No snapshot yet</div>
+        </div>
+
+        <div id="formArea" style="display:none;">
+          <div class="field"><label style="color:#fff;font-weight:600">Name</label><input id="inputName" type="text" placeholder="e.g. John Doe"></div>
+          <div class="field"><label style="color:#fff;font-weight:600">Bio</label><textarea id="inputBio" placeholder="Enter a short bio"></textarea></div>
+          <div style="display:flex;gap:8px;">
+            <button id="btnSave" class="btn primary" style="flex:1">Save Face Details</button>
+            <button id="btnClear" class="btn" style="flex:1">Clear</button>
+          </div>
+        </div>
+
+        <div id="matchArea" style="display:none;">
+          <div style="color:#fff;font-weight:700;font-size:15px" id="matchName"></div>
+          <div style="margin-top:6px;color:#fff;opacity:0.92" id="matchBio"></div>
+          <div style="margin-top:8px;"><button id="btnCloseMatch" class="secondary">Close</button></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+  /**********************
+   * FIREBASE
+   **********************/
+  const firebaseConfig = {
+    apiKey: "AIzaSyCgqUo8nanOWML5QhZlg6Ttd4q_GktI9-Q",
+    authDomain: "feceid-245b7.firebaseapp.com",
+    projectId: "feceid-245b7",
+    storageBucket: "feceid-245b7.firebasestorage.app",
+    messagingSenderId: "730720795658",
+    appId: "1:730720795658:web:0176127b4f0f5987b0f3f3"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  /**********************
+   * UI references
+   **********************/
+  const btnAdd = document.getElementById('btnAdd');
+  const btnKnow = document.getElementById('btnKnow');
+  const overlay = document.getElementById('overlay');
+  const video = document.getElementById('video');
+  const btnStop = document.getElementById('btnStop');
+  const btnCapture = document.getElementById('btnCapture');
+  const previewArea = document.getElementById('previewArea');
+  const formArea = document.getElementById('formArea');
+  const inputName = document.getElementById('inputName');
+  const inputBio = document.getElementById('inputBio');
+  const btnSave = document.getElementById('btnSave');
+  const btnClear = document.getElementById('btnClear');
+  const matchArea = document.getElementById('matchArea');
+  const matchName = document.getElementById('matchName');
+  const matchBio = document.getElementById('matchBio');
+  const btnCloseMatch = document.getElementById('btnCloseMatch');
+  const statusTag = document.getElementById('statusTag');
+  const modelsMessage = document.getElementById('modelsMessage');
+
+  /**********************
+   * State
+   **********************/
+  let modelsLoaded = false;
+  let loadModelsPromise = null;
+  let currentAction = null; // 'add' or 'know'
+  let detectionInterval = null;
+  let localStream = null;
+  let lastDescriptor = null; // Float32Array
+  let labeledFaceDescriptors = []; // for recognition
+  let faceDocsByLabel = {}; // name -> doc (bio,image,...)
+
+  // set the relative models path. IMPORTANT: keep this relative path (no leading slash)
+  const MODELS_URI = 'models';
+
+  /**********************
+   * Model loading
+   **********************/
+  async function loadModels() {
+    if (loadModelsPromise) return loadModelsPromise;
+    modelsMessage.textContent = 'Loading AI models — please wait...';
+    loadModelsPromise = (async () => {
+      try {
+        // ensure face-api is available
+        if (!window.faceapi) throw new Error('face-api.js failed to load');
+
+        // load exactly the networks your shards are for
+        await faceapi.nets.ssdMobilenetv1.loadFromUri(MODELS_URI);
+        await faceapi.nets.faceLandmark68Net.loadFromUri(MODELS_URI);
+        await faceapi.nets.faceRecognitionNet.loadFromUri(MODELS_URI);
+
         modelsLoaded = true;
-        console.log("Models loaded");
+        modelsMessage.textContent = 'AI models loaded — ready 👌';
+      } catch (err) {
+        console.error('Model load error', err);
+        modelsMessage.textContent = 'Model load failed. Check console & model files path.';
+        throw err;
+      }
+    })();
+    return loadModelsPromise;
+  }
+
+  // Start loading right away
+  loadModels().catch(()=>{ /* handled above */ });
+
+  /**********************
+   * Camera & detection
+   **********************/
+  async function startCamera() {
+    // stop any previous stream
+    stopCamera();
+
+    try {
+      localStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+        audio: false
+      });
+      video.srcObject = localStream;
+      await video.play();
+      return true;
+    } catch (err) {
+      console.error('Camera error', err);
+      alert('Could not access camera. Make sure you allowed camera permission.');
+      return false;
     }
-    loadModels();
+  }
 
-    async function startProcess(action) {
-        if (!modelsLoaded) {
-            alert("Please wait, loading AI models...");
-            return;
-        }
-        currentAction = action;
-        document.getElementById('cameraModal').classList.add('active');
-        document.getElementById('formArea').style.display = 'none';
-        document.getElementById('detailsArea').style.display = 'none';
-
-        const video = document.getElementById('video');
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => { video.srcObject = stream; });
-
-        if (action === 'know') {
-            await loadSavedFaces();
-        }
+  function stopCamera() {
+    if (localStream) {
+      localStream.getTracks().forEach(t => t.stop());
+      localStream = null;
     }
+    video.pause();
+    video.srcObject = null;
+  }
 
-    function closeModal() {
-        document.getElementById('cameraModal').classList.remove('active');
-        let stream = document.getElementById('video').srcObject;
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
+  function openOverlay() {
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden','false');
+  }
+  function closeOverlay() {
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden','true');
+  }
+
+  // draw a snapshot of the current video frame into preview area
+  function showSnapshot() {
+    const w = video.videoWidth || 640;
+    const h = video.videoHeight || 480;
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, w, h);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+    previewArea.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = dataUrl;
+    previewArea.appendChild(img);
+    return dataUrl;
+  }
+
+  // start a detection loop (poll every ~700ms)
+  function startDetectionLoop() {
+    if (detectionInterval) clearInterval(detectionInterval);
+
+    detectionInterval = setInterval(async () => {
+      if (!modelsLoaded) return;
+      if (!video || video.readyState < 2) return;
+
+      try {
+        const detection = await faceapi.detectSingleFace(video).withFaceLandmarks().withFaceDescriptor();
+        if (!detection) {
+          statusTag.textContent = 'No face detected';
+          return;
         }
-    }
 
-    async function loadSavedFaces() {
-        const snapshot = await db.collection('faces').get();
-        labeledFaceDescriptors = [];
-        for (let doc of snapshot.docs) {
-            const data = doc.data();
-            const descriptors = [new Float32Array(data.descriptor)];
-            labeledFaceDescriptors.push(new faceapi.LabeledFaceDescriptors(data.name, descriptors));
-        }
-    }
+        statusTag.textContent = 'Face detected';
 
-    document.getElementById('video').addEventListener('play', async () => {
+        // keep last descriptor for capture/save
+        lastDescriptor = detection.descriptor; // Float32Array
+
         if (currentAction === 'add') {
-            const interval = setInterval(async () => {
-                const detections = await faceapi.detectSingleFace(video).withFaceLandmarks().withFaceDescriptor();
-                if (detections) {
-                    clearInterval(interval);
-                    window.newFaceDescriptor = Array.from(detections.descriptor);
-                    document.getElementById('formArea').style.display = 'block';
-                }
-            }, 1000);
+          // show capture & form if not visible
+          if (formArea.style.display === 'none') {
+            // snapshot preview
+            showSnapshot();
+            formArea.style.display = 'block';
+            matchArea.style.display = 'none';
+            statusTag.textContent = 'Face captured — enter details below';
+          }
         } else if (currentAction === 'know') {
-            const interval = setInterval(async () => {
-                const detections = await faceapi.detectSingleFace(video).withFaceLandmarks().withFaceDescriptor();
-                if (detections && labeledFaceDescriptors.length) {
-                    const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors);
-                    const bestMatch = faceMatcher.findBestMatch(detections.descriptor);
-                    if (bestMatch.label !== 'unknown') {
-                        clearInterval(interval);
-                        const snapshot = await db.collection('faces').where('name', '==', bestMatch.label).get();
-                        if (!snapshot.empty) {
-                            const data = snapshot.docs[0].data();
-                            document.getElementById('detailsArea').innerHTML =
-                                `<strong>Name:</strong> ${data.name}<br><strong>Bio:</strong> ${data.bio}`;
-                            document.getElementById('detailsArea').style.display = 'block';
-                        }
-                    }
-                }
-            }, 1000);
+          // recognition
+          if (labeledFaceDescriptors.length === 0) {
+            statusTag.textContent = 'No saved faces — ask someone to Add first';
+            return;
+          }
+          // matcher threshold default 0.6; pass 0.55 to be stricter
+          const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.55);
+          const best = faceMatcher.findBestMatch(detection.descriptor);
+          console.log('best match', best);
+          if (best.label && best.label !== 'unknown') {
+            // found a match
+            const doc = faceDocsByLabel[best.label];
+            if (doc) {
+              // show match area
+              showSnapshot();
+              formArea.style.display = 'none';
+              matchArea.style.display = 'block';
+              matchName.textContent = doc.name + (typeof best.distance === 'number' ? ` (d=${best.distance.toFixed(3)})` : '');
+              matchBio.textContent = doc.bio || 'No bio saved';
+              statusTag.textContent = 'Match found';
+              // stop detection (you can keep running if you want)
+              clearInterval(detectionInterval);
+              detectionInterval = null;
+              return;
+            }
+          } else {
+            statusTag.textContent = 'Face not recognized';
+          }
         }
-    });
+      } catch (err) {
+        console.error('detection error', err);
+        statusTag.textContent = 'Detection error';
+      }
+    }, 700);
+  }
 
-    async function saveFace() {
-        const name = document.getElementById('name').value;
-        const bio = document.getElementById('bio').value;
-        if (!name || !bio || !window.newFaceDescriptor) return alert('Please fill all fields');
-        await db.collection('faces').add({
-            name, bio, descriptor: window.newFaceDescriptor
-        });
-        alert('Face saved successfully!');
-        closeModal();
+  function stopDetectionLoop() {
+    if (detectionInterval) {
+      clearInterval(detectionInterval);
+      detectionInterval = null;
     }
-</script>
+  }
+
+  /**********************
+   * Firestore helpers
+   **********************/
+  async function loadSavedFaces() {
+    labeledFaceDescriptors = [];
+    faceDocsByLabel = {};
+    try {
+      const snapshot = await db.collection('faces').get();
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        if (!data || !data.descriptor || !data.name) return;
+        // ensure descriptor is Float32Array
+        const desc = new Float32Array(data.descriptor);
+        labeledFaceDescriptors.push(new faceapi.LabeledFaceDescriptors(data.name, [desc]));
+        faceDocsByLabel[data.name] = {
+          id: doc.id,
+          name: data.name,
+          bio: data.bio || '',
+          image: data.image || null,
+          createdAt: data.createdAt || null
+        };
+      });
+      console.log('Loaded faces', Object.keys(faceDocsByLabel));
+      return true;
+    } catch (err) {
+      console.error('Firestore load error', err);
+      alert('Failed to load saved faces from database.');
+      return false;
+    }
+  }
+
+  async function saveFaceToFirestore(name, bio, descriptorArray, imageDataUrl=null) {
+    try {
+      await db.collection('faces').add({
+        name: name,
+        bio: bio,
+        descriptor: descriptorArray,
+        image: imageDataUrl,
+        createdAt: Date.now()
+      });
+      return true;
+    } catch (err) {
+      console.error('Firestore save error', err);
+      return false;
+    }
+  }
+
+  /**********************
+   * UI actions
+   **********************/
+  btnAdd.addEventListener('click', async () => {
+    currentAction = 'add';
+    formArea.style.display = 'none';
+    matchArea.style.display = 'none';
+    previewArea.innerHTML = '<div style="color:#fff;opacity:.8">Waiting for camera…</div>';
+    statusTag.textContent = 'Opening camera';
+
+    // ensure models loaded
+    try {
+      await loadModels();
+    } catch (err) {
+      alert('Models failed to load — check console & models folder.');
+      return;
+    }
+
+    const ok = await startCamera();
+    if (!ok) return;
+
+    openOverlay();
+    await new Promise(r => setTimeout(r, 120)); // tiny pause
+    startDetectionLoop();
+  });
+
+  btnKnow.addEventListener('click', async () => {
+    currentAction = 'know';
+    formArea.style.display = 'none';
+    matchArea.style.display = 'none';
+    previewArea.innerHTML = '<div style="color:#fff;opacity:.8">Waiting for camera…</div>';
+    statusTag.textContent = 'Opening camera';
+
+    // ensure models loaded
+    try {
+      await loadModels();
+    } catch (err) {
+      alert('Models failed to load — check console & models folder.');
+      return;
+    }
+
+    // load saved faces first
+    const okLoad = await loadSavedFaces();
+    if (!okLoad) {
+      // still try camera, but recognition won't work
+      console.warn('Unable to load faces, recognition disabled');
+    }
+
+    const ok = await startCamera();
+    if (!ok) return;
+
+    openOverlay();
+    await new Promise(r => setTimeout(r, 120));
+    startDetectionLoop();
+  });
+
+  btnStop.addEventListener('click', () => {
+    stopDetectionLoop();
+    stopCamera();
+    closeOverlay();
+    statusTag.textContent = 'Stopped';
+    previewArea.innerHTML = '<div style="color:#fff;opacity:.8">No snapshot</div>';
+    formArea.style.display = 'none';
+    matchArea.style.display = 'none';
+  });
+
+  btnCapture.addEventListener('click', () => {
+    if (!localStream) return alert('Camera not started');
+    const dataUrl = showSnapshot();
+    statusTag.textContent = 'Snapshot taken';
+    // keep lastDescriptor (if available)
+  });
+
+  btnSave.addEventListener('click', async () => {
+    if (!lastDescriptor) return alert('No face descriptor captured yet. Make sure face is visible.');
+    const name = inputName.value.trim();
+    const bio = inputBio.value.trim();
+    if (!name || !bio) return alert('Please enter name and bio');
+
+    // snapshot image to save
+    const dataUrl = showSnapshot();
+
+    // convert descriptor to simple number array for Firest
+    const descriptorArray = Array.from(lastDescriptor);
+
+    statusTag.textContent = 'Saving to database...';
+    btnSave.disabled = true;
+
+    const ok = await saveFaceToFirestore(name, bio, descriptorArray, dataUrl);
+    btnSave.disabled = false;
+
+    if (ok) {
+      alert('Face details saved successfully!');
+      // update local lists so recognition picks it up right away
+      labeledFaceDescriptors.push(new faceapi.LabeledFaceDescriptors(name, [new Float32Array(descriptorArray)]));
+      faceDocsByLabel[name] = { name, bio, image: dataUrl, createdAt: Date.now() };
+
+      // reset UI & stop camera
+      stopDetectionLoop();
+      stopCamera();
+      closeOverlay();
+      statusTag.textContent = 'Saved';
+      inputName.value = '';
+      inputBio.value = '';
+    } else {
+      alert('Failed to save. Check console for errors.');
+      statusTag.textContent = 'Save failed';
+    }
+  });
+
+  btnClear.addEventListener('click', () => {
+    inputName.value = '';
+    inputBio.value = '';
+    previewArea.innerHTML = '<div style="color:#fff;opacity:.8">No snapshot yet</div>';
+    lastDescriptor = null;
+    statusTag.textContent = 'Cleared';
+  });
+
+  btnCloseMatch.addEventListener('click', () => {
+    matchArea.style.display = 'none';
+    stopDetectionLoop();
+    stopCamera();
+    closeOverlay();
+  });
+
+  // close overlay when user clicks outside the panel
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      stopDetectionLoop();
+      stopCamera();
+      closeOverlay();
+    }
+  });
+
+  // helpful global cleanup when leaving page
+  window.addEventListener('beforeunload', () => {
+    stopDetectionLoop(); stopCamera();
+  });
+
+  // debug helper: expose faceapi to window
+  window._faceapi = faceapi;
+  </script>
 </body>
 </html>
