@@ -20,22 +20,40 @@
     --accent:#0f172a;
     --btn:#fff;
   }
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial;}
-  body{
-    background:linear-gradient(180deg,#e6eef8 0%, #f7fafc 100%);
-    display:flex;align-items:center;justify-content:center;padding:24px;
-  }
+  html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+
+    body {
+      background: url('https://images.unsplash.com/photo-1641312874336-6279a832a3dc?q=80&w=652&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') repeat center/cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: auto;
+    }
   .app{
-    width:100%;max-width:760px;background:var(--card);border-radius:20px;padding:20px;box-shadow:0 10px 30px rgba(12,15,20,0.08);
+    width:100%;max-width:760px;background:var(--card);border-radius:20px;padding:70px 50px;border-radius:20px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 10px 40px rgba(2,6,23,0.25);
+    color: white;
+    box-sizing:border-box;
+    overflow:auto;
+  
   }
   h1{margin:0 0 14px;color:#0b1220;font-size:20px}
   p.lead{color:var(--muted);margin:0 0 22px}
   .row{display:flex;gap:12px;flex-wrap:wrap}
   .btn{
-    flex:1;min-width:160px;background:linear-gradient(180deg,#fff,#f1f5f9);border-radius:14px;padding:14px;text-align:center;border:none;box-shadow:0 6px 18px rgba(2,6,23,0.06);cursor:pointer;font-size:16px;
+    flex:1;min-width:160px;background:linear-gradient(135deg, #92001E, black);color:white;border-radius:14px;padding:14px;text-align:center;border:none;box-shadow:0 6px 18px rgba(2,6,23,0.06);cursor:pointer;font-size:16px;
   }
-  .btn.secondary{background:linear-gradient(180deg,#0b1220,#0b1220);color:white}
-  .status{margin-top:12px;color:var(--muted);font-size:14px}
+  .btn.secondary{background:linear-gradient(135deg, #92001E, #black);color:white}
+  .status{margin-top:20px;color:var(-muted);font-size:16px}
 
   /* modal / camera sheet */
   .sheet{position:fixed;left:0;right:0;bottom:0;top:0;background:rgba(4,6,11,0.45);display:none;align-items:flex-end;justify-content:center;z-index:60}
@@ -52,18 +70,133 @@
 
   .footer-actions{display:flex;gap:12px;margin-top:12px}
   .btn-ghost{flex:1;background:transparent;border-radius:12px;padding:12px;border:1px solid #e6eef8}
+  }
 </style>
 </head>
 <body>
   <div class="app" role="main">
-    <h1>Face ID — Add your face or Know about you</h1>
-    <p class="lead">Tap <strong>Add Your Face</strong> to register (camera opens, app captures descriptor, then enter name & bio). Tap <strong>Know About Your Face</strong> to detect a saved face and display details.</p>
+    <h2>Hey Dear</h2>
+    <h2>Welcome To</h2>
+    <h3>Kundan's AI Face Recognizer </h3>
+    <br>
+<!-- Copy-paste this block (standalone robot SVG with fixed eyes & blink) -->
+<style>
+  .robot-svg { width: 180px; height: auto; display:block; margin:20px auto; }
+  .robot-svg svg { width:100%; height:auto; display:block; }
 
+  /* small float */
+  .robot-body { animation: float 3.6s ease-in-out infinite; transform-origin:center; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+  /* eye glow */
+  .eye-glow { filter: drop-shadow(0 0 10px rgba(20,220,255,0.85)) drop-shadow(0 0 18px rgba(10,150,255,0.45)); }
+
+  /* blink: scaleY to "close" eyes; transform-box ensures correct origin */
+  .eye-group { transform-box: fill-box; transform-origin: center; animation: blink 1s infinite; }
+  @keyframes blink {
+    0%, 92%, 100% { transform: scaleY(1); opacity: 1; }
+    94% { transform: scaleY(0.06); opacity: 0.8; }
+    95% { transform: scaleY(0.03); opacity: 0.6; }
+  }
+
+  /* subtle visor shine (smaller range so it doesn't look like eyebrow) */
+  .visor-shine { animation: shine 3.2s linear infinite; opacity:0.45; transform-origin:center; }
+  @keyframes shine {
+    0% { transform: translateX(-30%); opacity:0; }
+    30% { transform: translateX(-8%); opacity:0.18; }
+    60% { transform: translateX(8%);  opacity:0.36; }
+    100% { transform: translateX(30%); opacity:0; }
+  }
+
+  /* shadow under robot */
+  .robot-shadow { opacity: 0.32; filter: blur(6px); transition: opacity .3s; }
+</style>
+
+<div class="robot-svg" role="img" aria-label="Cute robot with blinking eyes">
+<svg viewBox="0 0 480 520" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="visorGrad" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#0b3a94"/>
+      <stop offset="0.35" stop-color="#00133a"/>
+      <stop offset="1" stop-color="#042359"/>
+    </linearGradient>
+    <radialGradient id="visorGlow" cx="50%" cy="45%" r="60%">
+      <stop offset="0" stop-color="#06e7ff" stop-opacity="0.9"/>
+      <stop offset="0.25" stop-color="#00a6ff" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#001540" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="chestGrad" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#56d6ff"/>
+      <stop offset="1" stop-color="#05a9ff"/>
+    </linearGradient>
+    <linearGradient id="softWhite" x1="0" x2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0.12"/>
+    </linearGradient>
+  </defs>
+
+  <!-- shadow -->
+  <ellipse cx="240" cy="480" rx="90" ry="18" fill="#0b1220" class="robot-shadow"/>
+
+  <!-- floating robot -->
+  <g class="robot-body">
+    <!-- body shape -->
+    <g transform="translate(60,190)">
+      <path d="M120 240 C60 240 40 210 40 160 C40 110 130 85 180 85 C230 85 320 110 320 160 C320 210 300 240 240 240 Z"
+            fill="#ffffff" stroke="#0c234a" stroke-width="8" stroke-linejoin="round"/>
+      <path d="M120 240 C60 240 40 210 40 160 C40 110 130 85 180 85 C230 85 320 110 320 160 C320 210 300 240 240 240 Z"
+            fill="url(#softWhite)" opacity="0.08"/>
+
+      <!-- chest panel -->
+      <g transform="translate(120,120)">
+        <rect x="-28" y="-6" rx="22" ry="22" width="120" height="86" fill="url(#chestGrad)" stroke="#003b66" stroke-width="6"/>
+        <rect x="-18" y="2" rx="16" ry="16" width="100" height="60" fill="rgba(255,255,255,0.12)"/>
+      </g>
+    </g>
+
+    <!-- head (keeps visor + eyes together so they align) -->
+    <g transform="translate(40,30)">
+      <!-- head outer -->
+      <path d="M200 70 C120 70 86 100 70 150 C64 168 60 190 60 210 C60 260 110 300 200 300 C290 300 340 260 340 210 C340 190 336 168 330 150 C314 100 280 70 200 70 Z"
+            fill="#ffffff" stroke="#0c234a" stroke-width="10" stroke-linejoin="round"/>
+      <path d="M200 70 C120 70 86 100 70 150 C64 168 60 190 60 210 C60 260 110 300 200 300 C290 300 340 260 340 210 C340 190 336 168 330 150 C314 100 280 70 200 70 Z"
+            fill="url(#softWhite)" opacity="0.06"/>
+
+      <!-- visor group - visor + eyes inside it -->
+      <g transform="translate(80,120)">
+        <ellipse cx="120" cy="40" rx="115" ry="60" fill="url(#visorGrad)"/>
+        <ellipse cx="120" cy="40" rx="100" ry="50" fill="url(#visorGlow)" opacity="0.95"/>
+
+        <!-- subtle moving shine on visor (narrow range so it doesn't look like eyebrow) -->
+        <path d="M15 20 C60 -5 180 -5 225 20" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="16" stroke-linecap="round" class="visor-shine"/>
+
+        <!-- EYES: placed relative to visor center - keeps alignment when scaled -->
+        <g class="eye-group eye-glow" transform="translate(0,0)">
+          <!-- left smile-eye (arc) -->
+          <path d="M64 40 Q86 18 108 40" fill="none" stroke="#1ef4ff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M64 40 Q86 18 108 40" fill="none" stroke="#56fbff" stroke-width="4" stroke-linecap="round" opacity="0.35"/>
+
+          <!-- right smile-eye (arc) -->
+          <path d="M152 40 Q174 18 196 40" fill="none" stroke="#1ef4ff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M152 40 Q174 18 196 40" fill="none" stroke="#56fbff" stroke-width="4" stroke-linecap="round" opacity="0.35"/>
+        </g>
+      </g>
+
+      <!-- small ear accents (purely decorative) -->
+      <rect x="20" y="160" rx="10" ry="10" width="28" height="40" fill="#ffffff" stroke="#0c234a" stroke-width="6"/>
+      <rect x="360" y="160" rx="10" ry="10" width="28" height="40" fill="#ffffff" stroke="#0c234a" stroke-width="6"/>
+    </g>
+  </g>
+</svg>
+</div>
+    <h4>Tap on Add your Face to Add details</h4>
+    <h4>Tap on Know About Your Face to see details</h4>
+     <br>
     <div class="row">
       <button id="btnAdd" class="btn">Add Your Face</button>
       <button id="btnKnow" class="btn secondary">Know About Your Face</button>
     </div>
-
+      <br>
     <div class="status" id="status">Loading AI models… (this may take a few seconds on mobile)</div>
   </div>
 
@@ -153,7 +286,7 @@
   // ---------- load models ----------
   let modelsLoaded = false;
   try {
-    statusEl.textContent = 'Loading AI models… (please wait)';
+    statusEl.textContent = 'Loading Kundan AI models… please wait';
     // load required nets
     await Promise.all([
       faceapi.nets.ssdMobilenetv1.loadFromUri(MODELS_URL),
@@ -336,7 +469,8 @@
       await loadSavedFacesToMatcher();
       await startCamera();
       // start scanning
-      sheetTitle.textContent = 'Scanning for a saved face…';
+  
+sheetTitle.textContent = 'Scanning for a saved face…';
       sheetHint.textContent = 'Move a known face into frame.';
       startDetectionLoop();
     }catch(e){
