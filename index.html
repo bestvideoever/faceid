@@ -53,7 +53,17 @@
     flex:1;min-width:160px;background:linear-gradient(135deg, #92001E, black);color:white;border-radius:14px;padding:14px;text-align:center;border:none;box-shadow:0 6px 18px rgba(2,6,23,0.06);cursor:pointer;font-size:16px;
   }
   .btn.secondary{background:linear-gradient(135deg, #92001E, #black);color:white}
-  .status{margin-top:20px;color:var(-muted);font-size:16px}
+  .status {
+  margin-top: 20px;
+  color: white; /* corrected syntax */
+  font-size: 16px;
+  animation: fadeFast 0.3s infinite alternate;
+}
+
+@keyframes fadeFast {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
 
   /* modal / camera sheet */
   .sheet{position:fixed;left:0;right:0;bottom:0;top:0;background:rgba(4,6,11,0.45);display:none;align-items:flex-end;justify-content:center;z-index:60}
